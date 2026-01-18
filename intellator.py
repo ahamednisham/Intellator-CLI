@@ -48,6 +48,18 @@ def translate_json(data, existing_translations, translator, progress_bar=None, v
     skipped_keys = []
     translated_keys = []
     failed_keys = []
+    reorganized = False
+    
+    # Detect if reorganization is needed
+    if existing_translations:
+        existing_keys = list(existing_translations.keys())
+        parent_keys = list(data.keys())
+        # Check if existing keys exist in parent and are in different order
+        common_keys = [k for k in existing_keys if k in parent_keys]
+        if common_keys:
+            # Get the order of common keys in parent
+            parent_order = [k for k in parent_keys if k in common_keys]
+            reorganized = (common_keys != parent_order)
     
     # Process each key-value pair in parent file order
     for key, value in data.items():
@@ -106,6 +118,7 @@ def translate_json(data, existing_translations, translator, progress_bar=None, v
     # Create statistics dictionary
     stats = {
         'total_keys': total_items,
+        'reorganized': reorganized,
         'skipped': {
             'count': len(skipped_keys),
             'keys': skipped_keys
@@ -144,6 +157,7 @@ Examples:
   # Positional arguments (simple usage):
   %(prog)s en ar                    # Translate en.json to ar.json
   %(prog)s en ar es de              # Translate en.json to ar.json, es.json, and de.json
+  %(prog)s en ar es -d locales      # Output to locales/ar.json, locales/es.json
   
   # Flag-based arguments (advanced usage):
   %(prog)s -i en.json -o ar.json
@@ -194,6 +208,12 @@ Examples:
         help='Overwrite output file if it exists without prompting'
     )
     
+    parser.add_argument(
+        '-d', '--output-dir',
+        type=str,
+        help='Output directory for translated files (default: current directory)'
+    )
+    
     args = parser.parse_args()
     
     # Handle positional arguments if provided
@@ -220,6 +240,15 @@ Examples:
             print(f"Current directory: {os.getcwd()}")
             sys.exit(1)
         
+        # Create output directory if specified and doesn't exist
+        if args.output_dir and not os.path.exists(args.output_dir):
+            try:
+                os.makedirs(args.output_dir)
+                print(f"Created output directory: {args.output_dir}")
+            except Exception as e:
+                print(f"Error: Failed to create output directory '{args.output_dir}': {e}")
+                sys.exit(1)
+        
         # Read input file once for all targets (optimization)
         print(f"Reading {args.input}...")
         try:
@@ -234,11 +263,21 @@ Examples:
             target_args = argparse.Namespace(**vars(args))
             target_args.target = target_lang
             if not args.output:
-                target_args.output = f"{target_lang}.json"
+                # Generate output filename
+                output_filename = f"{target_lang}.json"
+                # Use output directory if specified
+                if args.output_dir:
+                    target_args.output = os.path.join(args.output_dir, output_filename)
+                else:
+                    target_args.output = output_filename
             else:
                 # If output was explicitly set, only use it for the first target
                 if target_lang != target_langs[0]:
-                    target_args.output = f"{target_lang}.json"
+                    output_filename = f"{target_lang}.json"
+                    if args.output_dir:
+                        target_args.output = os.path.join(args.output_dir, output_filename)
+                    else:
+                        target_args.output = output_filename
             
             # Process this translation with pre-loaded input data
             _process_translation(target_args, input_data)
@@ -381,6 +420,10 @@ def _process_translation(args, input_data=None):
         print(f"   ├─ Skipped (existed): {stats['skipped']['count']}")
         print(f"   ├─ Newly Translated:  {stats['translated']['count']}")
         print(f"   └─ Failed:            {stats['failed']['count']}")
+        
+        # Show reorganization notice if it happened
+        if stats.get('reorganized', False):
+            print(f"\n🔄 File was reorganized to match parent key order")
         
         # Skipped translations
         if stats['skipped']['count'] > 0:

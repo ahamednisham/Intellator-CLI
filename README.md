@@ -43,6 +43,9 @@ python intellator.py en ar
 
 # Translate to multiple languages at once
 python intellator.py en ar es fr de
+
+# Save to a specific directory
+python intellator.py en ar es fr -d locales
 ```
 
 ### Flags (Advanced)
@@ -68,14 +71,15 @@ python intellator.py <source> <target1> [target2] [target3] ...
 
 ### Optional Flags
 
-| Flag          | Short | Description                         | Default                       |
-| ------------- | ----- | ----------------------------------- | ----------------------------- |
-| `--input`     | `-i`  | Input JSON file path                | `{source}.json`               |
-| `--output`    | `-o`  | Output JSON file path               | `{target}.json`               |
-| `--source`    | `-s`  | Source language code                | First positional arg or `en`  |
-| `--target`    | `-t`  | Target language code                | Second positional arg or `ar` |
-| `--verbose`   | `-v`  | Show detailed output with key names | `False`                       |
-| `--overwrite` |       | Skip overwrite prompts              | `False`                       |
+| Flag           | Short | Description                         | Default                       |
+| -------------- | ----- | ----------------------------------- | ----------------------------- |
+| `--input`      | `-i`  | Input JSON file path                | `{source}.json`               |
+| `--output`     | `-o`  | Output JSON file path               | `{target}.json`               |
+| `--output-dir` | `-d`  | Output directory for translations   | Current directory             |
+| `--source`     | `-s`  | Source language code                | First positional arg or `en`  |
+| `--target`     | `-t`  | Target language code                | Second positional arg or `ar` |
+| `--verbose`    | `-v`  | Show detailed output with key names | `False`                       |
+| `--overwrite`  |       | Skip overwrite prompts              | `False`                       |
 
 ## 🌍 Supported Languages
 
