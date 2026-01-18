@@ -35,7 +35,7 @@ pip install deep-translator tqdm
 
 ### Basic Usage (Recommended)
 
-The simplest way to use Intellator is with **direct language codes**:
+The simplest way to use Intellator is with **ISO language codes**:
 
 ```bash
 # Translate en.json to ar.json
@@ -43,9 +43,6 @@ python intellator.py en ar
 
 # Translate to multiple languages at once
 python intellator.py en ar es fr de
-
-# Language names work too
-python intellator.py english spanish french
 ```
 
 ### Flags (Advanced)
@@ -82,22 +79,25 @@ python intellator.py <source> <target1> [target2] [target3] ...
 
 ## 🌍 Supported Languages
 
-Intellator supports **100+ languages**. You can use either language names or ISO codes:
+Intellator supports **100+ languages** via ISO language codes:
 
-| Language   | ISO Code | Language Name |
-| ---------- | -------- | ------------- |
-| English    | `en`     | `english`     |
-| Arabic     | `ar`     | `arabic`      |
-| Spanish    | `es`     | `spanish`     |
-| French     | `fr`     | `french`      |
-| German     | `de`     | `german`      |
-| Italian    | `it`     | `italian`     |
-| Portuguese | `pt`     | `portuguese`  |
-| Russian    | `ru`     | `russian`     |
-| Chinese    | `zh`     | `chinese`     |
-| Japanese   | `ja`     | `japanese`    |
-| Korean     | `ko`     | `korean`      |
-| Hindi      | `hi`     | `hindi`       |
+| Language              | ISO Code |
+| --------------------- | -------- |
+| English               | `en`     |
+| Arabic                | `ar`     |
+| Spanish               | `es`     |
+| French                | `fr`     |
+| German                | `de`     |
+| Italian               | `it`     |
+| Portuguese            | `pt`     |
+| Russian               | `ru`     |
+| Chinese (Simplified)  | `zh-CN`  |
+| Chinese (Traditional) | `zh-TW`  |
+| Japanese              | `ja`     |
+| Korean                | `ko`     |
+| Hindi                 | `hi`     |
+
+**Note**: Language codes are case-sensitive (e.g., use `zh-CN`, not `zh-cn`).
 
 [View all supported languages →](https://cloud.google.com/translate/docs/languages)
 

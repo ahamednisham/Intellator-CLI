@@ -133,24 +133,6 @@ def write_json_file(data, file_path):
         raise IOError(f"Error writing to {file_path}: {e}")
 
 
-def get_language_code(lang):
-    """Get language code from common language names."""
-    lang_map = {
-        'english': 'en', 'en': 'en',
-        'arabic': 'ar', 'ar': 'ar',
-        'spanish': 'es', 'es': 'es',
-        'french': 'fr', 'fr': 'fr',
-        'german': 'de', 'de': 'de',
-        'italian': 'it', 'it': 'it',
-        'portuguese': 'pt', 'pt': 'pt',
-        'chinese': 'zh', 'zh': 'zh',
-        'japanese': 'ja', 'ja': 'ja',
-        'korean': 'ko', 'ko': 'ko',
-        'russian': 'ru', 'ru': 'ru',
-        'hindi': 'hi', 'hi': 'hi',
-    }
-    return lang_map.get(lang.lower(), lang.lower())
-
 
 def main():
     """Main function to orchestrate the translation process."""
@@ -222,15 +204,29 @@ Examples:
             sys.exit(1)
         
         # First language is source
-        source_lang = get_language_code(args.languages[0])
+        source_lang = args.languages[0]
         # Remaining languages are targets
-        target_langs = [get_language_code(lang) for lang in args.languages[1:]]
+        target_langs = args.languages[1:]
         
         # If flags were also provided, positional args take precedence
         if not args.source:
             args.source = source_lang
         if not args.input:
             args.input = f"{source_lang}.json"
+        
+        # Check if input file exists (do this once)
+        if not os.path.exists(args.input):
+            print(f"Error: Input file '{args.input}' not found.")
+            print(f"Current directory: {os.getcwd()}")
+            sys.exit(1)
+        
+        # Read input file once for all targets (optimization)
+        print(f"Reading {args.input}...")
+        try:
+            input_data = read_json_file(args.input)
+        except Exception as e:
+            print(f"Error reading input file: {e}")
+            sys.exit(1)
         
         # Process each target language
         for target_lang in target_langs:
@@ -244,8 +240,8 @@ Examples:
                 if target_lang != target_langs[0]:
                     target_args.output = f"{target_lang}.json"
             
-            # Process this translation
-            _process_translation(target_args)
+            # Process this translation with pre-loaded input data
+            _process_translation(target_args, input_data)
         
         return  # Exit after processing all targets
     
@@ -260,24 +256,23 @@ Examples:
     _process_translation(args)
 
 
-def _process_translation(args):
-    """Process a single translation task."""
+def _process_translation(args, input_data=None):
+    """Process a single translation task.
     
-    # Normalize language codes
-    source_lang = get_language_code(args.source)
-    target_lang = get_language_code(args.target)
+    Args:
+        args: Arguments namespace with translation settings
+        input_data: Optional pre-loaded input data (optimization for multiple targets)
+    """
+    
+    # Use language codes directly from args
+    source_lang = args.source
+    target_lang = args.target
     
     # Generate output filename if not provided
     if not args.output:
         # Extract base name and add target language
         base_name = os.path.splitext(args.input)[0]
         args.output = f"{base_name}_{target_lang}.json"
-    
-    # Check if input file exists
-    if not os.path.exists(args.input):
-        print(f"Error: Input file '{args.input}' not found.")
-        print(f"Current directory: {os.getcwd()}")
-        sys.exit(1)
     
     # Check if output file exists
     output_exists = os.path.exists(args.output)
@@ -308,9 +303,16 @@ def _process_translation(args):
         # Start timing
         start_time = time.time()
         
-        # Read the input JSON file
-        print(f"Reading {args.input}...")
-        input_data = read_json_file(args.input)
+        # Read the input JSON file (only if not already provided)
+        if input_data is None:
+            # Check if input file exists
+            if not os.path.exists(args.input):
+                print(f"Error: Input file '{args.input}' not found.")
+                print(f"Current directory: {os.getcwd()}")
+                sys.exit(1)
+            
+            print(f"Reading {args.input}...")
+            input_data = read_json_file(args.input)
         
         # Count total keys
         total_keys = len(input_data) if isinstance(input_data, dict) else 0
