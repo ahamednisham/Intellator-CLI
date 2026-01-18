@@ -1,199 +1,317 @@
-# JSON Translation Tool
+# Intellator - Smart JSON Translation Tool
 
-A command-line tool for translating JSON files from one language to another using Google Translate. Perfect for internationalization (i18n) workflows where you need to translate translation keys from a source language to multiple target languages.
+A powerful and intelligent command-line tool for translating JSON files between languages using Google Translate. Built for developers who need to internationalize (i18n) their applications efficiently and reliably.
 
-## Features
+## ✨ Key Features
 
-- 🌍 **Multi-language Support**: Translate between 100+ languages supported by Google Translate
-- 📊 **Progress Tracking**: Real-time progress bar showing translation status
-- 🔄 **Structure Preservation**: Maintains the exact JSON structure and key names
-- 🛡️ **Error Handling**: Graceful error handling with fallback to original values
-- ⚡ **Fast & Efficient**: Batch translation with progress indicators
-- 🎯 **Flexible CLI**: Comprehensive command-line interface with multiple options
-- 📝 **Verbose Mode**: Optional detailed output for debugging
+- 🚀 **Simple & Intuitive**: Just specify languages - `intellator.py en ar es` translates to multiple languages at once
+- 🧠 **Smart Translation**: Automatically skips already translated keys, only translating what's new or changed
+- 📊 **Real-time Progress**: Beautiful progress bars with detailed statistics and translation rates
+- 🔄 **Retry Logic**: Built-in retry mechanism with exponential backoff for failed translations
+- 🛡️ **Robust Error Handling**: Gracefully handles failures while preserving original values
+- 🌍 **100+ Languages**: Supports all languages available in Google Translate
+- 💾 **Structure Preservation**: Maintains exact JSON structure, key names, and formatting
+- 📈 **Comprehensive Stats**: Detailed reports showing skipped, translated, and failed keys
+- ⚡ **Blazing Fast**: Efficient batch processing with rate tracking
+- 🎯 **Flexible CLI**: Simple positional arguments for common tasks, flags for advanced control
 
-## Requirements
+## 🚀 Quick Start
 
-- Python 3.6+
-- Internet connection (for Google Translate API)
+### Installation
 
-## Installation
+1. **Clone or download this repository**
 
-1. Install the required dependencies:
+2. **Install dependencies** (one command!):
+
+```bash
+pip install -r requirements.txt
+```
+
+Or manually:
 
 ```bash
 pip install deep-translator tqdm
 ```
 
-## Usage
+### Basic Usage (Recommended)
 
-### Basic Usage
-
-Translate `en.json` to Arabic (default):
+The simplest way to use Intellator is with **direct language codes**:
 
 ```bash
-python translator.py
+# Translate en.json to ar.json
+python intellator.py en ar
+
+# Translate to multiple languages at once
+python intellator.py en ar es fr de
+
+# Language names work too
+python intellator.py english spanish french
 ```
 
-This will create `en_ar.json` (or `ar.json` if the input is `en.json`).
-
-### Custom Input/Output Files
+### Flags (Advanced)
 
 ```bash
-python translator.py -i en.json -o es.json -s en -t es
+# Custom files
+python intellator.py -i input.json -o output.json -s en -t ar
+
+# Verbose + auto-overwrite
+python intellator.py en ar -v --overwrite
 ```
 
-### Translate to Multiple Languages
+## Command Reference
 
-```bash
-# Spanish
-python translator.py -i en.json -o es.json -t es
+### Positional Arguments
 
-# French
-python translator.py -i en.json -o fr.json -t fr
-
-# German
-python translator.py -i en.json -o de.json -t de
+```
+python intellator.py <source> <target1> [target2] [target3] ...
 ```
 
-### Verbose Mode
+- **source**: Source language code (e.g., `en`, `es`, `fr`)
+- **target1, target2, ...**: One or more target language codes
 
-Get detailed output including the current key being translated:
+### Optional Flags
 
-```bash
-python translator.py -i en.json -o ar.json -v
-```
+| Flag          | Short | Description                         | Default                       |
+| ------------- | ----- | ----------------------------------- | ----------------------------- |
+| `--input`     | `-i`  | Input JSON file path                | `{source}.json`               |
+| `--output`    | `-o`  | Output JSON file path               | `{target}.json`               |
+| `--source`    | `-s`  | Source language code                | First positional arg or `en`  |
+| `--target`    | `-t`  | Target language code                | Second positional arg or `ar` |
+| `--verbose`   | `-v`  | Show detailed output with key names | `False`                       |
+| `--overwrite` |       | Skip overwrite prompts              | `False`                       |
 
-### Overwrite Existing Files
+## 🌍 Supported Languages
 
-By default, the tool will prompt before overwriting. Use `--overwrite` to skip the prompt:
+Intellator supports **100+ languages**. You can use either language names or ISO codes:
 
-```bash
-python translator.py -i en.json -o ar.json --overwrite
-```
+| Language   | ISO Code | Language Name |
+| ---------- | -------- | ------------- |
+| English    | `en`     | `english`     |
+| Arabic     | `ar`     | `arabic`      |
+| Spanish    | `es`     | `spanish`     |
+| French     | `fr`     | `french`      |
+| German     | `de`     | `german`      |
+| Italian    | `it`     | `italian`     |
+| Portuguese | `pt`     | `portuguese`  |
+| Russian    | `ru`     | `russian`     |
+| Chinese    | `zh`     | `chinese`     |
+| Japanese   | `ja`     | `japanese`    |
+| Korean     | `ko`     | `korean`      |
+| Hindi      | `hi`     | `hindi`       |
 
-## Command-Line Options
+[View all supported languages →](https://cloud.google.com/translate/docs/languages)
 
-| Option | Short | Description | Default |
-|--------|-------|-------------|---------|
-| `--input` | `-i` | Input JSON file path | `en.json` |
-| `--output` | `-o` | Output JSON file path | Auto-generated |
-| `--source` | `-s` | Source language code | `en` |
-| `--target` | `-t` | Target language code | `ar` |
-| `--verbose` | `-v` | Show verbose output | `False` |
-| `--overwrite` | | Overwrite output file without prompting | `False` |
+## 💡 Real-World Examples
 
-## Supported Languages
-
-The tool accepts both language names and ISO codes. Common examples:
-
-- **English**: `en` or `english`
-- **Arabic**: `ar` or `arabic`
-- **Spanish**: `es` or `spanish`
-- **French**: `fr` or `french`
-- **German**: `de` or `german`
-- **Italian**: `it` or `italian`
-- **Portuguese**: `pt` or `portuguese`
-- **Chinese**: `zh` or `chinese`
-- **Japanese**: `ja` or `japanese`
-- **Korean**: `ko` or `korean`
-- **Russian**: `ru` or `russian`
-- **Hindi**: `hi` or `hindi`
-
-For a complete list of supported languages, refer to [Google Translate supported languages](https://cloud.google.com/translate/docs/languages).
-
-## Examples
-
-### Example 1: Translate English to Arabic
+### Example 1: Simple Translation
 
 **Input (`en.json`):**
+
 ```json
 {
-  "welcome.message": "Welcome to our application",
+  "welcome.title": "Welcome to Intellator",
   "button.submit": "Submit",
-  "error.notFound": "Page not found"
+  "error.404": "Page not found"
 }
 ```
 
 **Command:**
+
 ```bash
-python translator.py -i en.json -o ar.json
+python intellator.py en ar
 ```
 
 **Output (`ar.json`):**
+
 ```json
 {
-  "welcome.message": "مرحباً بك في تطبيقنا",
+  "welcome.title": "مرحبا بك في إنتليتور",
   "button.submit": "إرسال",
-  "error.notFound": "الصفحة غير موجودة"
+  "error.404": "الصفحة غير موجودة"
 }
 ```
 
-### Example 2: Translate to Spanish with Verbose Output
+**Console Output:**
+
+```
+Reading en.json...
+Found 3 translation key(s) in parent file.
+Initializing Google Translator (en -> ar)...
+Processing: 100%|████████████| 3/3 [00:01<00:00, 2.45 keys/s]
+
+================================================================================
+✓ TRANSLATION COMPLETE
+================================================================================
+
+⏱️  Time Elapsed: 1.22s
+📊 Translation Rate: 2.45 keys/second
+
+📈 Overall Statistics:
+   Total Keys in Parent: 3
+   ├─ Skipped (existed): 0
+   ├─ Newly Translated:  3
+   └─ Failed:            0
+
+✨ Newly Translated (3):
+   1. welcome.title
+   2. button.submit
+   3. error.404
+
+💾 Output File: ar.json
+🌐 Languages: EN → AR
+
+================================================================================
+```
+
+### Example 2: Multi-Language Translation
+
+Translate your app to 5 languages with one command:
 
 ```bash
-python translator.py -i en.json -o es.json -t es -v
+# First run: translates all keys
+python intellator.py en ar
+
+# Later: only translates NEW keys
+python intellator.py en ar  # Auto-skips existing translations
 ```
 
 ### Example 3: Batch Translation Script
 
-Create a script to translate to multiple languages:
+Create a reusable script (`translate-all.sh` / `translate-all.bat`):
+
+**Bash (Linux/Mac):**
 
 ```bash
 #!/bin/bash
-languages=("es" "fr" "de" "it" "pt")
-
-for lang in "${languages[@]}"; do
-    python translator.py -i en.json -o "${lang}.json" -t "$lang" --overwrite
-done
+python intellator.py en ar es fr de it pt ja ko zh ru hi --overwrite --verbose
 ```
 
-## How It Works
+**Batch (Windows):**
 
-1. **Read Input**: Loads the source JSON file
-2. **Initialize Translator**: Sets up Google Translator with source and target languages
-3. **Translate Values**: Iterates through each key-value pair:
+```batch
+@echo off
+python intellator.py en ar es fr de it pt ja ko zh ru hi --overwrite --verbose
+```
+
+### Example 4: CI/CD Integration
+
+```yaml
+# .github/workflows/translate.yml
+name: Auto Translate
+on:
+  push:
+    paths: ["locales/en.json"]
+jobs:
+  translate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - uses: actions/setup-python@v4
+      - run: pip install -r requirements.txt
+      - run: python intellator.py en es fr de --overwrite
+      - uses: stefanzweifel/git-auto-commit-action@v4
+```
+
+## 🔧 How Intellator Works
+
+1. **📖 Read Input**: Loads your source JSON file (e.g., `en.json`)
+2. **🔍 Check Existing**: Loads target file if exists to skip already translated keys
+3. **🌐 Initialize Translator**: Sets up Google Translate with source/target languages
+4. **⚡ Translate**: Processes each key:
+   - Skips if already translated
    - Translates string values
-   - Preserves non-string values (numbers, booleans, etc.)
-   - Maintains the original key structure
-4. **Handle Errors**: If translation fails for a key, keeps the original value
-5. **Write Output**: Saves the translated JSON with proper formatting
+   - Preserves numbers, booleans, null
+   - Retries on failure (up to 3 times with exponential backoff)
+5. **💾 Save**: Writes translated JSON with proper formatting and UTF-8 encoding
+6. **📊 Report**: Shows comprehensive statistics
 
-## Error Handling
+## 🛡️ Error Handling & Reliability
 
-- **File Not Found**: Clear error message with current directory info
-- **Invalid JSON**: Detailed JSON parsing error
-- **Translation Failures**: Original values preserved, warnings logged
-- **Network Issues**: Graceful handling of API connection problems
-- **Keyboard Interrupt**: Clean exit on Ctrl+C
+Intellator is built to be robust:
 
-## Output Format
+| Scenario              | Handling                         |
+| --------------------- | -------------------------------- |
+| File not found        | Clear error with directory path  |
+| Invalid JSON          | Detailed parsing error           |
+| Network issues        | 3 retries with backoff           |
+| Translation fails     | Preserves original, logs warning |
+| Existing translations | Auto-skip                        |
+| Ctrl+C                | Clean exit                       |
 
-The tool preserves:
-- ✅ Original key names (not translated)
-- ✅ JSON structure and indentation
-- ✅ Non-string values (numbers, booleans, null)
-- ✅ UTF-8 encoding for all languages
+## 📊 What Gets Preserved
 
-## Troubleshooting
+- ✅ **JSON key names** (never translated)
+- ✅ **JSON structure & nesting**
+- ✅ **Non-string values** (numbers, booleans, arrays, null)
+- ✅ **Key ordering**
+- ✅ **UTF-8 encoding** (supports all languages)
 
-### "Error: Input file not found"
-- Ensure the input file exists in the current directory
-- Use absolute paths if needed: `python translator.py -i /path/to/en.json`
+## 🐛 Troubleshooting
 
-### Translation fails for some keys
-- Check your internet connection
-- Some text may be rate-limited by Google Translate
-- Original values are preserved as fallback
+**File not found:**
 
-### Output file encoding issues
-- The tool uses UTF-8 encoding by default
-- Ensure your editor supports UTF-8 for viewing translated files
+```bash
+pwd  # Check directory
+ls -la en.json  # Verify file
+python intellator.py -i /full/path/to/file.json  # Use absolute path
+```
 
-## License
+**Slow/failed translations:**
+
+- Check internet connection
+- Google may rate-limit - use `--verbose` to see progress
+- Failed keys preserve original values
+
+**Encoding issues:**
+
+- Ensure UTF-8 terminal/editor support
+- Files auto-save as UTF-8
+
+## Supported Languages
+
+100+ languages via ISO codes or names:
+
+| Language | Code | Name       |
+| -------- | ---- | ---------- |
+| English  | `en` | `english`  |
+| Arabic   | `ar` | `arabic`   |
+| Spanish  | `es` | `spanish`  |
+| French   | `fr` | `french`   |
+| German   | `de` | `german`   |
+| Chinese  | `zh` | `chinese`  |
+| Japanese | `ja` | `japanese` |
+| Russian  | `ru` | `russian`  |
+
+[Full list →](https://cloud.google.com/translate/docs/languages)
+
+## Requirements
+
+- **Python**: 3.6 or higher
+- **Dependencies**:
+  - `deep-translator` (>=1.11.4) - Translation API wrapper
+  - `tqdm` (>=4.66.0) - Progress bars
+- **Internet**: Required for Google Translate API
+
+## 📄 License
 
 This project is open source and available for use.
 
-## Contributing
+## 🤝 Contributing
 
-Contributions are welcome! Feel free to submit issues or pull requests.
+Contributions are welcome! Feel free to:
+
+- 🐛 Report bugs
+- 💡 Suggest features
+- 🔧 Submit pull requests
+- 📖 Improve documentation
+
+## 🙏 Credits
+
+Built with:
+
+- [deep-translator](https://github.com/nidhaloff/deep-translator) - Google Translate API wrapper
+- [tqdm](https://github.com/tqdm/tqdm) - Progress bars
+
+---
+
+**Made with ❤️ for developers who believe in breaking language barriers**
