@@ -75,16 +75,12 @@ def translate_json(data, existing_translations, translator, progress_bar=None, v
         else:
             # Only translate string values
             if isinstance(value, str):
-                translation_success = False
-                last_error = None
-                
                 # Retry logic - attempt translation up to max_retries times
                 for attempt in range(1, max_retries + 1):
                     try:
                         translated_text = translator.translate(value)
                         translated_data[key] = translated_text
                         translated_keys.append(key)
-                        translation_success = True
                         
                         # Update progress bar
                         if progress_bar:
@@ -94,7 +90,6 @@ def translate_json(data, existing_translations, translator, progress_bar=None, v
                         break  # Success, exit retry loop
                         
                     except Exception as e:
-                        last_error = e
                         if attempt < max_retries:
                             # Wait before retrying (exponential backoff)
                             time.sleep(1 * attempt)
@@ -141,10 +136,8 @@ def write_json_file(data, file_path):
     try:
         with open(file_path, 'w', encoding='utf-8') as f:
             json.dump(data, f, ensure_ascii=False, indent=2)
-        return True
     except Exception as e:
         raise IOError(f"Error writing to {file_path}: {e}")
-
 
 
 def main():
@@ -257,6 +250,9 @@ Examples:
             print(f"Error reading input file: {e}")
             sys.exit(1)
         
+        # Track results for each language
+        results = []
+        
         # Process each target language
         for target_lang in target_langs:
             # Create a copy of args for each target
@@ -280,7 +276,33 @@ Examples:
                         target_args.output = output_filename
             
             # Process this translation with pre-loaded input data
-            _process_translation(target_args, input_data)
+            try:
+                _process_translation(target_args, input_data)
+                results.append({'lang': target_lang, 'success': True, 'error': None})
+            except Exception as e:
+                results.append({'lang': target_lang, 'success': False, 'error': str(e)})
+                print(f"\n❌ Error translating to {target_lang}: {e}")
+                print(f"➡️  Continuing with remaining languages...\n")
+        
+        # Display summary if multiple targets
+        if len(target_langs) > 1:
+            print(f"\n{'='*80}")
+            print(f"📋 BATCH TRANSLATION SUMMARY")
+            print(f"{'='*80}")
+            
+            successful = [r for r in results if r['success']]
+            failed = [r for r in results if not r['success']]
+            
+            print(f"\n✅ Successful: {len(successful)}/{len(results)}")
+            for r in successful:
+                print(f"   • {r['lang'].upper()}")
+            
+            if failed:
+                print(f"\n❌ Failed: {len(failed)}/{len(results)}")
+                for r in failed:
+                    print(f"   • {r['lang']}: {r['error']}")
+            
+            print(f"\n{'='*80}\n")
         
         return  # Exit after processing all targets
     
@@ -346,9 +368,7 @@ def _process_translation(args, input_data=None):
         if input_data is None:
             # Check if input file exists
             if not os.path.exists(args.input):
-                print(f"Error: Input file '{args.input}' not found.")
-                print(f"Current directory: {os.getcwd()}")
-                sys.exit(1)
+                raise FileNotFoundError(f"Input file '{args.input}' not found in {os.getcwd()}")
             
             print(f"Reading {args.input}...")
             input_data = read_json_file(args.input)
@@ -357,8 +377,7 @@ def _process_translation(args, input_data=None):
         total_keys = len(input_data) if isinstance(input_data, dict) else 0
         
         if total_keys == 0:
-            print("Error: No keys found in the input file.")
-            sys.exit(1)
+            raise ValueError("No keys found in the input file")
         
         print(f"Found {total_keys} translation key(s) in parent file.")
         
@@ -367,8 +386,11 @@ def _process_translation(args, input_data=None):
         try:
             translator = GoogleTranslator(source=source_lang, target=target_lang)
         except Exception as e:
-            print(f"Error: Failed to initialize translator: {e}")
-            sys.exit(1)
+            error_msg = str(e)
+            if "-->" in error_msg:
+                error_msg = error_msg.split("-->", 1)[1].strip()
+            error_msg = error_msg.split('\n')[0].strip()
+            raise ValueError(f"{error_msg} Refer documentation for supported languages.")
         
         # Create progress bar
         progress_bar = tqdm(
@@ -393,7 +415,7 @@ def _process_translation(args, input_data=None):
         
         # Display comprehensive statistics
         print(f"\n{'='*80}")
-        print(f"✓ TRANSLATION COMPLETE")
+        print(f"✅ TRANSLATION COMPLETE")
         print(f"{'='*80}")
         
         # Time statistics
@@ -458,19 +480,17 @@ def _process_translation(args, input_data=None):
         
     except FileNotFoundError as e:
         print(f"\n✗ {e}", file=sys.stderr)
-        sys.exit(1)
+        raise
     except ValueError as e:
-        print(f"\n✗ {e}", file=sys.stderr)
-        sys.exit(1)
+        raise
     except IOError as e:
         print(f"\n✗ {e}", file=sys.stderr)
-        sys.exit(1)
+        raise
     except KeyboardInterrupt:
         print("\n\nTranslation interrupted by user.")
         sys.exit(1)
     except Exception as e:
-        print(f"\n✗ Unexpected error: {e}", file=sys.stderr)
-        sys.exit(1)
+        raise
 
 
 if __name__ == "__main__":
