@@ -271,23 +271,6 @@ python intellator.py -i /full/path/to/file.json  # Use absolute path
 - Ensure UTF-8 terminal/editor support
 - Files auto-save as UTF-8
 
-## Supported Languages
-
-100+ languages via ISO codes or names:
-
-| Language | Code | Name       |
-| -------- | ---- | ---------- |
-| English  | `en` | `english`  |
-| Arabic   | `ar` | `arabic`   |
-| Spanish  | `es` | `spanish`  |
-| French   | `fr` | `french`   |
-| German   | `de` | `german`   |
-| Chinese  | `zh` | `chinese`  |
-| Japanese | `ja` | `japanese` |
-| Russian  | `ru` | `russian`  |
-
-[Full list →](https://cloud.google.com/translate/docs/languages)
-
 ## Requirements
 
 - **Python**: 3.6 or higher
